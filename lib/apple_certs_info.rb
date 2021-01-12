@@ -5,19 +5,23 @@ require "tempfile"
 module AppleCertsInfo
   class Error < StandardError; end
 
-  def self.certificate_development_list_limit_days_for(days:)
+  # Check Certificate file for iPhone/Apple Development in the KeyChain
+  # @param days: limit days
+  def self.certificate_development_list_limit_days_for(days:, log: false)
     raise "do not set days param" if days.nil?
-    limit_days_for(days: days, type: "certificate_development")
+    limit_days_for(days: days, type: "certificate_development", log: log)
   end
 
-  def self.certificate_distribution_list_limit_days_for(days:)
+  # Check Certificate file for iPhone/Apple Distribution in the KeyChain
+  def self.certificate_distribution_list_limit_days_for(days:, log: false)
     raise "do not set days param" if days.nil?
-    limit_days_for(days: days, type: "certificate_distribution")
+    limit_days_for(days: days, type: "certificate_distribution", log: log)
   end
 
-  def self.provisioning_profile_list_limit_days_for(days:)
+  # Check Provisioning Profiles in the Directory that is ~/Library/MobileDevice/Provisioning Profiles/
+  def self.provisioning_profile_list_limit_days_for(days:, log: false)
     raise "do not set days param" if days.nil?
-    limit_days_for(days: days, type: "provisioning_profile")
+    limit_days_for(days: days, type: "provisioning_profile", log: log)
   end
 
   def self.certificate_development_list
@@ -99,7 +103,7 @@ module AppleCertsInfo
   end
 
   private
-  def self.limit_days_for(days:, type:)
+  def self.limit_days_for(days:, type:, log: false)
     case type
     when "certificate_development" then
       list = certificate_development_list
@@ -108,6 +112,7 @@ module AppleCertsInfo
     when "provisioning_profile" then
       list = provisioning_profile_list_info
     end
+    puts(list) if log == true
 
     danger_list = []
     list.each do |info|
