@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    apple_certs_info (0.1.0)
+    apple_certs_info (0.1.1)
 
 GEM
   remote: https://rubygems.org/
