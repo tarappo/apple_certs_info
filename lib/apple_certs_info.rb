@@ -3,25 +3,33 @@ require "time"
 require "tempfile"
 
 module AppleCertsInfo
+  @debug_log = false
   class Error < StandardError; end
+
+  def self.set_debug_log(flag)
+    @debug_log = flag
+  end
+  def self.debug_log
+    @debug_log
+  end
 
   # Check Certificate file for iPhone/Apple Development in the KeyChain
   # @param days: limit days
-  def self.certificate_development_list_limit_days_for(days:, log: false)
+  def self.certificate_development_list_limit_days_for(days:)
     raise "do not set days param" if days.nil?
-    limit_days_for(days: days, type: "certificate_development", log: log)
+    limit_days_for(days: days, type: "certificate_development")
   end
 
   # Check Certificate file for iPhone/Apple Distribution in the KeyChain
-  def self.certificate_distribution_list_limit_days_for(days:, log: false)
+  def self.certificate_distribution_list_limit_days_for(days:)
     raise "do not set days param" if days.nil?
-    limit_days_for(days: days, type: "certificate_distribution", log: log)
+    limit_days_for(days: days, type: "certificate_distribution")
   end
 
   # Check Provisioning Profiles in the Directory that is ~/Library/MobileDevice/Provisioning Profiles/
-  def self.provisioning_profile_list_limit_days_for(days:, log: false)
+  def self.provisioning_profile_list_limit_days_for(days:)
     raise "do not set days param" if days.nil?
-    limit_days_for(days: days, type: "provisioning_profile", log: log)
+    limit_days_for(days: days, type: "provisioning_profile")
   end
 
   def self.certificate_development_list
@@ -40,6 +48,7 @@ module AppleCertsInfo
     begin
       `security find-certificate -a -c "#{name}" -p > #{temp_pem_file.path}`
       result = `openssl x509 -text -fingerprint -noout -in #{temp_pem_file.path}`
+      puts(result) if @debug_log == true
 
       expire_datetime_match = result.match(/.*Not After :(.*)/)
       raise "not exits expire date" if expire_datetime_match.nil?
@@ -103,7 +112,7 @@ module AppleCertsInfo
   end
 
   private
-  def self.limit_days_for(days:, type:, log: false)
+  def self.limit_days_for(days:, type:)
     case type
     when "certificate_development" then
       list = certificate_development_list
@@ -112,7 +121,7 @@ module AppleCertsInfo
     when "provisioning_profile" then
       list = provisioning_profile_list_info
     end
-    puts(list) if log == true
+    puts(list) if @debug_log == true
 
     danger_list = []
     list.each do |info|
@@ -124,7 +133,8 @@ module AppleCertsInfo
 
   def self.certificate_list_for(name:)
     result = `security find-certificate -a -c "#{name}"`
-    name_match_list = result.scan(/.*alis"<blob>=\"(.*)\".*/)
+    name_match_list = result.scan(/.*alis".*=\"(.*)\".*/)
+    puts(name_match_list) if @debug_log == true
 
     info = []
     name_match_list.each do|name_match|
