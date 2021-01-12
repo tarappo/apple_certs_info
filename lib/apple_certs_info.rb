@@ -132,7 +132,9 @@ module AppleCertsInfo
   end
 
   def self.certificate_list_for(name:)
+    puts("targetName: #{name}") if @debug_log == true
     result = `security find-certificate -a -c "#{name}"`
+    puts(result) if @debug_log == true
     name_match_list = result.scan(/.*alis".*=\"(.*)\".*/)
     puts(name_match_list) if @debug_log == true
 
