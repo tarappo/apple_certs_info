@@ -3,23 +3,17 @@ RSpec.describe AppleCertsInfo do
     expect(AppleCertsInfo::VERSION).not_to be nil
   end
 
-  xit "provisioning profile info" do
+  xit "Provisioning Profile info" do
     info = AppleCertsInfo.provisioning_profile_list_info
-    puts(info)
   end
 
-  it "sample" do
+  xit "Certificate info" do
     info = AppleCertsInfo.certificate_distribution_list
-    puts(info)
-
     info = AppleCertsInfo.certificate_development_list
-    puts(info)
   end
 
-  it "days" do
+  xit "limit days" do
     list = AppleCertsInfo.provisioning_profile_list_limit_days_for(days: 55)
-    puts(list)
     list = AppleCertsInfo.certificate_development_list_limit_days_for(days: 255)
-    puts(list)
   end
 end
