@@ -18,13 +18,14 @@ Or install it yourself as:
 
 ## Usage
 
-Information with an expiration date of 55 days or less will return.
+Information with an expiration date of 10 days or less will return.
 
  - Provisioning Profiles
 
 ```
 AppleCertsInfo.provisioning_profile_list_limit_days_for(days: 10)
 ```
+
  - Certificatefiles（Development / Distribution）
 
 
