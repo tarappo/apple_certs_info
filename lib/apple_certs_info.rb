@@ -13,11 +13,11 @@ module AppleCertsInfo
     @debug_log
   end
 
-  # Check Certificate file for iPhone/Apple Development in the KeyChain
+  # Check Certificate file for iPhone/Apple Developer in the KeyChain
   # @param days: limit days
   def self.certificate_development_list_limit_days_for(days:)
     raise "do not set days param" if days.nil?
-    limit_days_for(days: days, type: "certificate_development")
+    limit_days_for(days: days, type: "certificate_developer")
   end
 
   # Check Certificate file for iPhone/Apple Distribution in the KeyChain
@@ -32,8 +32,8 @@ module AppleCertsInfo
     limit_days_for(days: days, type: "provisioning_profile")
   end
 
-  def self.certificate_development_list
-    certificate_list_for(name: "Development")
+  def self.certificate_developer_list
+    certificate_list_for(name: "Developer")
   end
 
   def self.certificate_distribution_list
@@ -114,8 +114,8 @@ module AppleCertsInfo
   private
   def self.limit_days_for(days:, type:)
     case type
-    when "certificate_development" then
-      list = certificate_development_list
+    when "certificate_developer" then
+      list = certificate_developer_list
     when "certificate_distribution" then
       list = certificate_distribution_list
     when "provisioning_profile" then
@@ -132,9 +132,7 @@ module AppleCertsInfo
   end
 
   def self.certificate_list_for(name:)
-    puts("targetName: #{name}") if @debug_log == true
     result = `security find-certificate -a -c "#{name}"`
-    puts(result) if @debug_log == true
     name_match_list = result.scan(/.*alis".*=\"(.*)\".*/)
     puts(name_match_list) if @debug_log == true
 
