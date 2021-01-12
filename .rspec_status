@@ -1,0 +1,6 @@
+example_id                           | status  | run_time        |
+------------------------------------ | ------- | --------------- |
+./spec/apple_certs_info_spec.rb[1:1] | passed  | 0.00054 seconds |
+./spec/apple_certs_info_spec.rb[1:2] | pending | 0.00001 seconds |
+./spec/apple_certs_info_spec.rb[1:3] | passed  | 0.37772 seconds |
+./spec/apple_certs_info_spec.rb[1:4] | pending | 0.00002 seconds |
