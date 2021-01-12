@@ -7,13 +7,13 @@ Gem::Specification.new do |spec|
   spec.email         = ["toshiyuki.hirata@dena.com"]
 
   spec.summary       = %q{Apple Certificate files and Provisioning Profile information.}
-  spec.homepage      = "https://github.com/tarappo/"
+  spec.homepage      = "https://github.com/tarappo/apple_certs_info"
   spec.license       = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.3.0")
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "https://github.com/tarappo/."
-  spec.metadata["changelog_uri"] = "https://github.com/tarappo/"
+  spec.metadata["source_code_uri"] = "https://github.com/tarappo/apple_certs_info"
+  spec.metadata["changelog_uri"] = "https://github.com/tarappo/apple_certs_info/releases"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
