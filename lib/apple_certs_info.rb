@@ -38,7 +38,7 @@ module AppleCertsInfo
     apple_list = certificate_list_for(name: "Apple Development")
     list.concat(iphone_list)
     list.concat(apple_list)
-    return list
+    return list.uniq
   end
 
   def self.certificate_distribution_list
@@ -47,7 +47,7 @@ module AppleCertsInfo
     apple_list = certificate_list_for(name: "Apple Distribution")
     list.concat(iphone_list)
     list.concat(apple_list)
-    return list
+    return list.uniq
   end
 
   def self.certificate_info_for(name:)
