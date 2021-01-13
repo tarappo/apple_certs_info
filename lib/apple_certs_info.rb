@@ -13,11 +13,11 @@ module AppleCertsInfo
     @debug_log
   end
 
-  # Check Certificate file for iPhone/Apple Developer in the KeyChain
+  # Check Certificate file for iPhone Developer /Apple Development in the KeyChain
   # @param days: limit days
   def self.certificate_development_list_limit_days_for(days:)
     raise "do not set days param" if days.nil?
-    limit_days_for(days: days, type: "certificate_developer")
+    limit_days_for(days: days, type: "certificate_development")
   end
 
   # Check Certificate file for iPhone/Apple Distribution in the KeyChain
@@ -32,12 +32,16 @@ module AppleCertsInfo
     limit_days_for(days: days, type: "provisioning_profile")
   end
 
-  def self.certificate_developer_list
-    certificate_list_for(name: "Developer")
+  def self.certificate_development_list
+    list = []
+    list = certificate_list_for(name: "iPhone Developer")
+    list << certificate_list_for(name: "Apple Development")
   end
 
   def self.certificate_distribution_list
-    certificate_list_for(name: "Distribution")
+    list = []
+    list = certificate_list_for(name: "iPhone Distribution")
+    list << certificate_list_for(name: "Apple Distribution")
   end
 
   def self.certificate_info_for(name:)
@@ -48,7 +52,6 @@ module AppleCertsInfo
     begin
       `security find-certificate -a -c "#{name}" -p > #{temp_pem_file.path}`
       result = `openssl x509 -text -fingerprint -noout -in #{temp_pem_file.path}`
-      puts(result) if @debug_log == true
 
       expire_datetime_match = result.match(/.*Not After :(.*)/)
       raise "not exits expire date" if expire_datetime_match.nil?
@@ -56,7 +59,7 @@ module AppleCertsInfo
       expire_datetime = Time.parse(expire_datetime_match[1])
 
       cname_match = result.match(/Subject: .* CN=(.*), OU=.*/)
-      raise "not exists cname" if cname_match.nil?
+      raise "not exists cname：#{result}" if cname_match.nil?
       cname = cname_match[1]
 
       limit_days = calc_limit_days(datetime: expire_datetime)
@@ -114,8 +117,8 @@ module AppleCertsInfo
   private
   def self.limit_days_for(days:, type:)
     case type
-    when "certificate_developer" then
-      list = certificate_developer_list
+    when "certificate_development" then
+      list = certificate_development_list
     when "certificate_distribution" then
       list = certificate_distribution_list
     when "provisioning_profile" then
