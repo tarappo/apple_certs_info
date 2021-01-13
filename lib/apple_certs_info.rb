@@ -34,14 +34,20 @@ module AppleCertsInfo
 
   def self.certificate_development_list
     list = []
-    list = certificate_list_for(name: "iPhone Developer")
-    list << certificate_list_for(name: "Apple Development")
+    iphone_list = certificate_list_for(name: "iPhone Developer")
+    apple_list = certificate_list_for(name: "Apple Development")
+    list.concat(iphone_list)
+    list.concat(apple_list)
+    return list
   end
 
   def self.certificate_distribution_list
     list = []
-    list = certificate_list_for(name: "iPhone Distribution")
-    list << certificate_list_for(name: "Apple Distribution")
+    iphone_list = certificate_list_for(name: "iPhone Distribution")
+    apple_list = certificate_list_for(name: "Apple Distribution")
+    list.concat(iphone_list)
+    list.concat(apple_list)
+    return list
   end
 
   def self.certificate_info_for(name:)
@@ -128,7 +134,7 @@ module AppleCertsInfo
 
     danger_list = []
     list.each do |info|
-      danger_list << info if info[:limit_days] <= days
+      danger_list << info if info[:limit_days].to_i <= days.to_i
     end
 
     danger_list
