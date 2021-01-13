@@ -3,7 +3,7 @@ require_relative 'lib/apple_certs_info/version'
 Gem::Specification.new do |spec|
   spec.name          = "apple_certs_info"
   spec.version       = AppleCertsInfo::VERSION
-  spec.authors       = ["Toshiyuki Hirata"]
+  spec.authors       = ["tarappo"]
   spec.email         = ["tarappo@gmail.com"]
 
   spec.summary       = %q{Apple Certificate files and Provisioning Profile information.}
