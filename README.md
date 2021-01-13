@@ -30,10 +30,10 @@ AppleCertsInfo.provisioning_profile_list_limit_days_for(days: 10)
 
 
 ```
-# Development
+# iPhone Developer / Apple Development
 AppleCertsInfo.certificate_development_list_limit_days_for(days: 10)
 
-# Distribution
+# iPhone / Apple Distribution
 AppleCertsInfo.certificate_distribution_list_limit_days_for(days: 10)
 ```
 
