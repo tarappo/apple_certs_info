@@ -13,6 +13,17 @@ module AppleCertsInfo
     @debug_log
   end
 
+  # Remove duplicate certificate
+  # remove first data
+  def self.remove_duplicate_certificate
+    list = certificate_development_list.concat(certificate_distribution_list)
+
+    duplicate_cname = list.group_by{ |e| e[:cname] }.select { |k, v| v.size > 1 }.map(&:first)
+    duplicate_cname.each do |cname|
+      delete_first_match_keychain(name: cname)
+    end
+  end
+
   # Check Certificate file for iPhone Developer /Apple Development in the KeyChain
   # @param days: limit days
   # @return:
@@ -127,12 +138,12 @@ module AppleCertsInfo
       expire_datetime_match.each do |original_datetime|
         expire_datetime = Time.parse(original_datetime.first)
         limit_days = calc_limit_days(datetime: expire_datetime)
-        cname = cname_match[1]
+        cname = cname_match[1] # cname is same
 
         info << {
-          :expire_datetime => expire_datetime,
-          :limit_days => limit_days,
-          :cname => cname
+            :expire_datetime => expire_datetime,
+            :limit_days => limit_days,
+            :cname => cname,
         }
       end
     rescue StandardError => e
@@ -146,8 +157,20 @@ module AppleCertsInfo
 
 
   private
+  def self.delete_first_match_keychain(name:)
+    result = `security find-certificate -a -c "#{name}" -Z`
+    sha_match = result.match(/SHA-1 hash: (.*)/)
+    keychain_path = result.match(/keychain: (.*)/)
+    raise "not exits sha-1" if sha_match.nil?
+    raise "not exits keychain_path" if keychain_path.nil?
+    sha1 = sha_match[1]
+    puts "Delete #{name} / SHA-1: #{sha1}"
+
+    result = `security delete-certificate -Z #{sha1} #{keychain_path[1]}`
+  end
+
   def self.certificate_list_for(name:)
-    result = `security find-certificate -a -c "#{name}"`
+    result = `security find-certificate -a -c "#{name}" -Z`
     name_match_list = result.scan(/.*alis".*=\"(.*)\".*/)
     puts(name_match_list) if @debug_log == true
 
