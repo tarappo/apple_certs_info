@@ -16,7 +16,11 @@ module AppleCertsInfo
   # Remove duplicate certificate
   # remove first data
   def self.remove_duplicate_certificate
-    list = certificate_development_list.concat(certificate_distribution_list)
+    list = []
+    dist_list = certificate_distribution_list
+    develop_list = certificate_development_list
+    list.concat(dist_list) unless dist_list.nil?
+    list.concat(develop_list) unless develop_list.nil?
 
     duplicate_cname = list.group_by{ |e| e[:cname] }.select { |k, v| v.size > 1 }.map(&:first)
     duplicate_cname.each do |cname|
@@ -63,8 +67,8 @@ module AppleCertsInfo
     list = []
     iphone_list = certificate_list_for(name: "iPhone Developer")
     apple_list = certificate_list_for(name: "Apple Development")
-    list.concat(iphone_list)
-    list.concat(apple_list)
+    list.concat(iphone_list) unless iphone_list.nil?
+    list.concat(apple_list) unless apple_list.nil?
     return list
   end
 
@@ -73,8 +77,8 @@ module AppleCertsInfo
     list = []
     iphone_list = certificate_list_for(name: "iPhone Distribution")
     apple_list = certificate_list_for(name: "Apple Distribution")
-    list.concat(iphone_list)
-    list.concat(apple_list)
+    list.concat(iphone_list) unless iphone_list.nil?
+    list.concat(apple_list) unless apple_list.nil?
     return list
   end
 
