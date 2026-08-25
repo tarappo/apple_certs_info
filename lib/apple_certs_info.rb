@@ -1,6 +1,7 @@
 require "apple_certs_info/version"
 require "time"
 require "tempfile"
+require "shellwords"
 
 module AppleCertsInfo
   @debug_log = false
@@ -49,22 +50,12 @@ module AppleCertsInfo
 
   # All iPhone Developer and Apple Development List
   def self.certificate_development_list
-    list = []
-    iphone_list = certificate_list_for(name: "iPhone Developer")
-    apple_list = certificate_list_for(name: "Apple Development")
-    list.concat(iphone_list) unless iphone_list.nil?
-    list.concat(apple_list) unless apple_list.nil?
-    return list
+    certificate_list_for(name: "iPhone Developer") + certificate_list_for(name: "Apple Development")
   end
 
   # All iPhone Distribution and Apple Distribution List
   def self.certificate_distribution_list
-    list = []
-    iphone_list = certificate_list_for(name: "iPhone Distribution")
-    apple_list = certificate_list_for(name: "Apple Distribution")
-    list.concat(iphone_list) unless iphone_list.nil?
-    list.concat(apple_list) unless apple_list.nil?
-    return list
+    certificate_list_for(name: "iPhone Distribution") + certificate_list_for(name: "Apple Distribution")
   end
 
   # Provisioning Profile List
@@ -80,19 +71,18 @@ module AppleCertsInfo
 
       begin
         # exchange plist file
-        system("security cms -D -i '#{file}' > #{plist_file}")
+        unless system("security cms -D -i #{Shellwords.escape(file)} > #{Shellwords.escape(plist_file)}")
+          raise "failed to decode Provisioning Profile: #{file}"
+        end
 
         # checking plist file
-        expire_datetime = Time.parse(`/usr/libexec/PlistBuddy -c 'Print ExpirationDate' #{plist_file}`)
-        app_identifier = `/usr/libexec/PlistBuddy -c 'Print Entitlements:application-identifier' #{plist_file}`.chomp
-        app_id_name = `/usr/libexec/PlistBuddy -c 'Print AppIDName' #{plist_file}`.chomp
+        expire_datetime = Time.parse(`/usr/libexec/PlistBuddy -c 'Print ExpirationDate' #{Shellwords.escape(plist_file)}`)
+        app_identifier = `/usr/libexec/PlistBuddy -c 'Print Entitlements:application-identifier' #{Shellwords.escape(plist_file)}`.chomp
+        app_id_name = `/usr/libexec/PlistBuddy -c 'Print AppIDName' #{Shellwords.escape(plist_file)}`.chomp
 
         limit_days = calc_limit_days(datetime: expire_datetime)
-
-      rescue StandardError => e
-        raise(e.message)
       ensure
-        temp_plist_file.close && temp_plist_file.unlink
+        temp_plist_file.close!
       end
 
       list << {
@@ -115,12 +105,12 @@ module AppleCertsInfo
     raise "do not set name param" if name.nil?
 
     info = []
+    temp_pem_file = certificate_exchange_pem_file_for(name: name)
     begin
-      temp_pem_file = certificate_exchange_pem_file_for(name: name)
-      result = `openssl crl2pkcs7 -nocrl -certfile #{temp_pem_file.path} | openssl pkcs7 -print_certs -text -noout`
+      result = `openssl crl2pkcs7 -nocrl -certfile #{Shellwords.escape(temp_pem_file.path)} | openssl pkcs7 -print_certs -text -noout`
 
       expire_datetime_match = result.scan(/.*Not After :(.*)/)
-      raise "not exits expire date" if expire_datetime_match.nil?
+      raise "not exists expire date" if expire_datetime_match.empty?
 
       cname_match = result.match(/Subject: .* CN=(.*), OU=.*/)
       raise "not exists cname：#{result}" if cname_match.nil?
@@ -136,19 +126,18 @@ module AppleCertsInfo
             :cname => cname,
         }
       end
-    rescue StandardError => e
-      raise(e.message)
     ensure
-      temp_pem_file.close && temp_pem_file.unlink
+      temp_pem_file.close!
     end
 
     return info
   end
 
 
-  private
+  # --- internal methods ---
+
   def self.certificate_list_for(name:)
-    result = `security find-certificate -a -c "#{name}" -Z`
+    result = `security find-certificate -a -c #{Shellwords.escape(name)} -Z`
     name_match_list = result.scan(/.*alis".*=\"(.*)\".*/)
     puts(name_match_list) if @debug_log == true
 
@@ -157,7 +146,7 @@ module AppleCertsInfo
       info << certificate_info_for(name:name_match[0])
     end
 
-    info.flatten!
+    info.flatten
   end
 
   # filtering list
@@ -174,7 +163,7 @@ module AppleCertsInfo
   # @param name: unique name
   def self.certificate_exchange_pem_file_for(name:)
     temp_pem_file = Tempfile.new(::File.basename("temp_pem"))
-    `security find-certificate -a -c "#{name}" -p > #{temp_pem_file.path}`
+    `security find-certificate -a -c #{Shellwords.escape(name)} -p > #{Shellwords.escape(temp_pem_file.path)}`
 
     temp_pem_file
   end
@@ -182,4 +171,9 @@ module AppleCertsInfo
   def self.calc_limit_days(datetime:)
     ((datetime - Time.now)/(24*60*60)).ceil
   end
+
+  private_class_method :certificate_list_for,
+                       :filtering_limit_days_for,
+                       :certificate_exchange_pem_file_for,
+                       :calc_limit_days
 end
